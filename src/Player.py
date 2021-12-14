@@ -1,5 +1,8 @@
 
 import numpy as np
+import pandas as pd
+from string import ascii_letters
+
 import GameException
 
 
@@ -8,9 +11,12 @@ class Player:
     defaultChar = '~'
 
     def __init__(self, boardSize, id, name):
-        # self.shots = np.empty_like((boardSize, boardSize))
-        # self.ships = []
-        self.board = np.full((boardSize, boardSize), self.defaultChar)
+
+        letters = pd.Series(list(ascii_letters.upper()[:boardSize]))
+
+        self.publicBoard = pd.DataFrame(np.full([boardSize, boardSize], self.defaultChar), letters)
+
+        self.privateBoard = self.publicBoard.copy()
         self.data = {
             'id': id,
             'name': name,
@@ -19,13 +25,41 @@ class Player:
             'lostGames': 0
         }
 
+
     def getShipPoints(self, cStart, cEnd):
         # It will return a list of coords where the ship should be placed
 
         points = []
 
+        list(cStart)[0]
+
+
         x = cEnd[0] - cStart[0]
         y = cEnd[1] - cStart[1]
+
+        if x == 0 and y != 0:  # El barco está en horizontal
+            for i in range(0, y + 1):
+                points.append((cStart[0], cStart[1] + i))
+
+        elif y == 0 and x != 0:  # El barco está en vertical
+            for i in range(0, x + 1):
+                points.append((cStart[0] + i, cStart[1]))
+
+        else:  # El barco solo tiene un punto
+            points.append(cStart)
+
+        return points
+
+    def getShipPoints2(self, cStart, cEnd):
+        # It will return a list of coords where the ship should be placed
+
+        points = []
+
+        letters = pd.Series(list(ascii_letters.upper()[:self.publicBoard.shape[0]]))
+        list(cStart)[0]
+
+        x = letters.index(list(cEnd)[0]) - letters.index(list(cStart)[0])
+        y = int(cEnd[1:]) - int(cStart[1:])
 
         if x == 0 and y != 0:  # El barco está en horizontal
             for i in range(0, y + 1):

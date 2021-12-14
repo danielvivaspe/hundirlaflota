@@ -69,6 +69,7 @@ class Player:
             for i in range(0, x + 1):
                 points.append((cStart[0] + i, cStart[1]))
 
+
         else:  # El barco solo tiene un punto
             points.append(cStart)
 

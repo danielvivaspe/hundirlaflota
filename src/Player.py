@@ -43,7 +43,7 @@ class Player:
     def placeShip(self, shipPoints):
 
         for i in range(len(shipPoints)):
-            if self.positionState(shipPoints[i]) == 2:
+            if self.positionState(shipPoints[i]) == 1:
                 raise GameException(1, {'position': shipPoints[i]})
 
         for i in range(len(shipPoints)):
@@ -69,6 +69,16 @@ class Player:
             return 3 #  Ship position
 
     def shipFits(self, cStart, cEnd):
-        #Sacar el maximo de la x y de la y
-        #Si es mas que el tamaño, devuelve falso
-        pass
+
+        #tamano del tablero > maximo de las coordenadas x o y
+        # Si el maximo de las coordenadas de x o y es mayor que el tamano, se sale
+
+        if (
+                self.board.shape[0] > (max(cStart[0], cEnd[0])) and
+                self.board.shape[0] > (max(cStart[1], cEnd[1]))
+        ):
+            return True
+
+        return False
+
+

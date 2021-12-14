@@ -8,8 +8,8 @@ def textException():
     raise GameException(code=1, data={'position': (2, 3)})
 
 
-jugador = Player('Ana').re
-maquina = Player('Maquina').receiveShot()
+def testShipFits():
+    print(player.shipFits((1, 2), (1, 9)))
 
 
 def testPlaceShip():
@@ -28,5 +28,12 @@ def testGetShipPoints():
     print('\n\n')
     print(player.getShipPoints((2, 1), (2, 1)))
 
+try:
+    tmp = 2 / 0
 
-testGetShipPoints()
+
+except:
+    print('error')
+
+
+

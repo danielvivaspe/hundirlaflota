@@ -3,6 +3,19 @@ import numpy as np
 
 class Game:
 
-    def __init__(self, boardSize):
+    def __init__(self):
         pass
-        #tablero = np.full((boardSize, boardSize), "~")
+
+    def play(self):
+        pass
+
+    def askForData(self):
+        pass
+        #escribe nombre
+        #dame tamaño
+
+    def printMenu(self):
+        pass
+        #Jugar
+        #Salir
+        #Creditos

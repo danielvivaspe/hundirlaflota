@@ -1,7 +1,7 @@
-
 import numpy as np
 import pandas as pd
 from string import ascii_letters
+from playsound import playsound
 
 import GameException
 
@@ -14,7 +14,8 @@ class Player:
 
         letters = pd.Series(list(ascii_letters.upper()[:boardSize]))
 
-        self.publicBoard = pd.DataFrame(np.full([boardSize, boardSize], self.defaultChar), letters)
+        self.publicBoard = pd.DataFrame(np.full([boardSize, boardSize], self.defaultChar), letters,
+                                        columns=range(1, boardSize + 1))
 
         self.privateBoard = self.publicBoard.copy()
         self.data = {
@@ -25,86 +26,116 @@ class Player:
             'lostGames': 0
         }
 
-    def getShipPoints(self, cStart, cEnd):
-        # It will return a list of coords where the ship should be placed
+    def getShipPoints(self, ship):
+        """
+        Genera una lista con todos los puntos del barco, extremos incluidos
+        :param ship: La tupla del barco
+        :return: lista con todos los puntos
+        """
 
         points = []
 
         letters = list(ascii_letters.upper()[:self.publicBoard.shape[0]])
 
-        x = letters.index(cEnd[0]) - letters.index(cStart[0])
-        y = int(cEnd[1:]) - int(cStart[1:])
+        x = self.getCoordLetterIndex(ship[1]) - self.getCoordLetterIndex(ship[0])
+        y = int(ship[1][1:]) - int(ship[0][1:])
 
         if x == 0 and y != 0:  # El barco está en horizontal
             for i in range(0, y + 1):
-                points.append(cStart[0] + str(int(cStart[1:]) + i))
+                points.append(ship[0][0] + str(int(ship[0][1:]) + i))
 
         elif y == 0 and x != 0:  # El barco está en vertical
             for i in range(0, x + 1):
-                #points.append(str(letters.index(cStart[0] + i)) + cEnd[1:])
-                #letters[letters.index(int(cStart[0])) + i] + cEnd[1:]
-                points.append(letters[letters.index(cStart[0]) + i] + cEnd[1:])
-
+                points.append(letters[letters.index(ship[0][0]) + i] + ship[1][1:])
 
         else:  # El barco solo tiene un punto
-            points.append(cStart)
+            points.append(ship[0])
 
         return points
 
-    def placeShip(self, shipPoints):
+    def placeShip(self, ship):
+        """
+        Comprueba si el barco cabe o se sale del tablero
+        :param ship: La tupla con las coordenadas del barco
+        :return: True o False dependiendo de si entra o no
+        """
 
-        for i in range(len(shipPoints)):
-            if self.positionState(shipPoints[i]) == 1:
-                raise GameException(1, {'position': shipPoints[i]})
+        if self.shipFits(ship):
+            for i in range(len(ship)):
+                if self.positionState(ship[i]) != 1:
+                    return False
 
-        for i in range(len(shipPoints)):
-            self.board[shipPoints[i][0]][shipPoints[i][1]] = self.data['shipChar']
+        shipPoints = self.getShipPoints(ship)
+
+        for i in shipPoints:
+            self.privateBoard.loc[i[0]][int(i[1:])] = self.data['shipChar']
+
+        return True
 
     def receiveShot(self, coord):
-        self.board[coord[0], coord[1]] = self.shotChar
+        """
+        Recibe una disparo
+        :param coord: La posicion disparada
+        :return: Codigo de lo que habia en la posicion
+        """
 
-    def positionState(self, coord):
+        playsound('../sound/shot.wav')
+
+        # self.privateBoard[coord[0], coord[1]] = self.shotChar
+        # self.publicBoard[coord[0], coord[1]] = self.shotChar
+
+        code = self.positionState(coord)
+
+        self.privateBoard.loc[coord[0]][int(coord[1:])] = self.shotChar
+        self.publicBoard.loc[coord[0]][int(coord[1:])] = self.shotChar
+
+        sound = f'../sound/shot_{code}.wav'
+        playsound(sound)
+
+        return code
+
+    def positionState(self, pos):
         """
         Checks the state of the position
-        :param coord:
+        :param pos: La posicion que se quiere comprobar
         :return: The position code
             1 - Free position
             2 - Shooted position
             3 - Ship position
         """
-        if self.board[coord[0]][coord[1]] == self.defaultChar:
-            return 1  # Free position
-        elif self.board[coord[0]][coord[1]] == self.shotChar:
-            return 2  # Shooted position
-        elif self.board[coord[0]][coord[1]] == self.data['shipChar']:
-            return 3 #  Ship position
 
-    def shipFits(self, coord):
+        if self.privateBoard.loc[pos[0]][int(pos[1:])] == self.defaultChar:
+            return 1  # Free position
+        elif self.privateBoard.loc[pos[0]][int(pos[1:])] == self.shotChar:
+            return 2  # Shooted position
+        elif self.privateBoard.loc[pos[0]][int(pos[1:])] == self.data['shipChar']:
+            return 3  # Ship position
+
+    def shipFits(self, ship):
         """
         Comprueba si un barco cabe en el tablero. No comprueba si hay otros barcos.
-        :param coord: La tupla del barco a comprobar
+        :param ship: La tupla del barco a comprobar
         :return: True si cabe o False si no
         """
 
-        #tamano del tablero > maximo de las coordenadas x o y
-        # Si el maximo de las coordenadas de x o y es mayor que el tamano, se sale
+        shipPoints = self.getShipPoints(ship)
 
+        for i in shipPoints:
 
+            if (
+                    (self.privateBoard.shape[0] + 1) <= self.getCoordLetterIndex(i[0]) or
+                    (self.privateBoard.shape[1] + 1) <= int(i[1:])
+            ):
+                return False
 
-        if (
-                (self.privateBoard.shape[0] + 1) > (max(self.getCoordLetterIndex(coord[0]), self.getCoordLetterIndex(coord[1]))) and
-                (self.privateBoard.shape[0] + 1) > (max(int(coord[0][1:]), int(coord[1][1:])))
-        ):
-            return True
+        return True
 
-        return False
-
-    def shipRemains(self):
+    def shipRemaining(self):
         """
         Comprueba si quedan barcos sin disparar en el tablero
-        :return: True o False si quedan o no
+        :return: Int con la cantidad de posiciones de barcos sin disparar que quedan
         """
-        pass
+        return np.sum([self.privateBoard == self.data['shipChar']])
 
     def addShip(self, ship):
         """
@@ -112,13 +143,17 @@ class Player:
         :param ship: Tupla con el barco (C1, D1)
         :return: True si ha podido ponerlo o False si no ha podido
         """
-        pass
+        # 1. Sacar lista de posiciones
+        shipPoints = self.getShipPoints(ship)
 
+        # 2. Comprobar si cabe
+        fits = self.shipFits(ship)
 
+        # 3. Colocar
+        place = self.placeShip(ship)
+
+        # 4. Devolver respuesta
+        return fits and place
 
     def getCoordLetterIndex(self, pos):
-        return ascii_letters.upper().index(pos[0])
-
-
-
-
+        return ascii_letters.upper().index(pos[0]) + 1

@@ -19,6 +19,8 @@ class Game:
     def __init__(self):
         self.printMenu()
 
+    def requirements():
+        pip install playsound#<---todo por algún motivo, esto me da 6 error graves
 
     #def play(self):#<---todo Borrar cuando estemos seguros
     #    self.printMenu()

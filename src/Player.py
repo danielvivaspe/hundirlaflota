@@ -64,6 +64,8 @@ class Player:
             for i in range(len(ship)):
                 if self.positionState(ship[i]) != 1:
                     return False
+        else:
+            return False
 
         shipPoints = self.getShipPoints(ship)
 
@@ -120,11 +122,17 @@ class Player:
 
         shipPoints = self.getShipPoints(ship)
 
+        if len(shipPoints) == 0:
+            return False
+
         for i in shipPoints:
 
             if (
+                    len(shipPoints) == [] or
                     (self.privateBoard.shape[0] + 1) <= self.getCoordLetterIndex(i[0]) or
-                    (self.privateBoard.shape[1] + 1) <= int(i[1:])
+                    0 >= self.getCoordLetterIndex(i[0]) or
+                    (self.privateBoard.shape[1] + 1) <= int(i[1:]) or
+                    0 >= int(i[1:])
             ):
                 return False
 
@@ -154,6 +162,10 @@ class Player:
 
         # 4. Devolver respuesta
         return fits and place
+
+    def validateShoot(self, coord):
+        pass
+        #valida que el disparo este dentro de el tablero
 
     def getCoordLetterIndex(self, pos):
         return ascii_letters.upper().index(pos[0]) + 1

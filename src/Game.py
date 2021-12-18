@@ -2,7 +2,7 @@ import random
 import string
 
 from Player import Player
-#import GameException#<---todo ¿Borrar?
+from playsound import playsound
 
 
 class Game:
@@ -18,13 +18,6 @@ class Game:
 
     def __init__(self):
         self.printMenu()
-
-    def requirements():
-        pip install playsound#<---todo por algún motivo, esto me da 6 error graves
-
-    #def play(self):#<---todo Borrar cuando estemos seguros
-    #    self.printMenu()
-
 
 
     def printMenu(self):
@@ -74,6 +67,7 @@ class Game:
         lista_BARCOS = [ship_4[0], ship_3[0], ship_3[1], ship_2[0], ship_2[1], ship_2[2], ship_1[0], ship_1[1],
                         ship_1[2],
                         ship_1[3]]
+
         lista_Final = []
         for i in lista_BARCOS:
             fit_on = False
@@ -91,9 +85,10 @@ class Game:
                         ship = self.steerLeft(proa, i)
                 else:
                     ship = (proa, proa)  # <--- todo ¿Esto es necesario?
-                fit_on = Player.addShip(self, i)
+                fit_on = self.player_computer.addShip(ship)
             lista_Final.append(ship)
         print(lista_Final)
+
         self.makePlayerShip()
 
 
@@ -128,7 +123,8 @@ class Game:
                         ship = self.steerLeft(proa, i)
                 else:
                     ship = (proa, proa)  # <--- todo ¿Esto es necesario?
-                fit_on = Player.addShip(self, i)
+                fit_on = self.player_1.addShip(ship)
+                #<---todo indicar ERROR
             lista_Final.append(ship)
         print("Así queda distribuida tu flota", lista_Final)
         self.startBattle()
@@ -139,7 +135,7 @@ class Game:
         indice_abc = self.size_abc.index(proa[0])
         letter_indice_abc = indice_abc - i[1]
         popa = self.size_abc[letter_indice_abc] + proa[1:]
-        ship = (proa, popa)
+        ship = (popa, proa)
         return ship
 
 
@@ -159,7 +155,7 @@ class Game:
 
     def steerLeft(self, proa, i):
         popa = proa[0] + str(int(proa[1:]) - int(i[1]))
-        ship = (proa, popa)
+        ship = (popa, proa)
         return ship
 
 
@@ -183,8 +179,8 @@ class Game:
         result=self.player_computer.receiveShot(playerTurn)
         while result == 3:
             print ("¡BLANCO!")
-            check = self.player_computer.shipRemains()  # <---todo validar coordenadas de barco
-            if check == True:
+            check = self.player_computer.shipRemaining()  # <---todo validar coordenadas de barco
+            if check == 0:
                 self.computerDefeat()
             playerTurn = input("Tienes un nuevo disparo ¿Hacia dónde quieres dirigirlo?: ")
             while playerTurn[0] not in self.size_abc or int(playerTurn[1:]) > self.boardSize:
@@ -206,8 +202,8 @@ class Game:
             if result == 3:
                 print(f"Tu rival disparó a la posición {computerTurn[0]}{computerTurn[1]}")
                 print("¡BLANCO!")
-                check=self.player_computer.shipRemains()# <---todo validar coordenadas de barco
-                if check == True:
+                check=self.player_computer.shipRemaining()# <---todo validar coordenadas de barco
+                if check == 0:
                     self.playerDefeat()
             computerTurn = str (self.size_abc[random.randint(0, self.boardSize-1)]) + str(random.randint(1, self.boardSize))
             result = self.player_computer.receiveShot(computerTurn)
@@ -224,6 +220,7 @@ class Game:
 
     def computerDefeat (self):
         print ("¡VICTORIA! La flota rival ha sido hundida. Has ganado la partida.")
+        playsound('../sound/shot.wav')
         self.endGame()
 
 

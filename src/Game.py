@@ -126,6 +126,7 @@ class Game:
                 fit_on = self.player_1.addShip(ship)
                 #<---todo indicar ERROR
             lista_Final.append(ship)
+            print(self.player_1.privateBoard)
         print("Así queda distribuida tu flota", lista_Final)
         self.startBattle()
 

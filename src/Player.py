@@ -35,7 +35,7 @@ class Player:
 
         points = []
 
-        letters = list(ascii_letters.upper()[:self.publicBoard.shape[0]])
+        letters = list(ascii_letters.upper())
 
         x = self.getCoordLetterIndex(ship[1]) - self.getCoordLetterIndex(ship[0])
         y = int(ship[1][1:]) - int(ship[0][1:])
@@ -82,9 +82,6 @@ class Player:
         """
 
         playsound('../sound/shot.wav')
-
-        # self.privateBoard[coord[0], coord[1]] = self.shotChar
-        # self.publicBoard[coord[0], coord[1]] = self.shotChar
 
         code = self.positionState(coord)
 
@@ -162,10 +159,6 @@ class Player:
 
         # 4. Devolver respuesta
         return fits and place
-
-    def validateShoot(self, coord):
-        pass
-        #valida que el disparo este dentro de el tablero
 
     def getCoordLetterIndex(self, pos):
         return ascii_letters.upper().index(pos[0]) + 1
